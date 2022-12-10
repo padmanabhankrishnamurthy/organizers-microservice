@@ -10,6 +10,11 @@ function submit_signup(){
     }
     data["non_profit"] = $("#non_profit").is(":checked")
 
+    // TODO:
+    // 1. add username and password fields
+    // 2. check if username is taken
+    //        if taken, ask to enter a different username. Need to check success in ajax function
+    //        else create account and lof it in db
     $.ajax({
       type: "POST",
       url: SUBMIT_ENDPOINT + "signup",
