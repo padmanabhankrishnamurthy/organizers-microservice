@@ -1,4 +1,6 @@
-form_fields = ["org_name", "email", "account_number", "routing_number", "bank_name", "st_and_apt", "city", "state", "zipcode", "country"]
+form_fields = ["org_name", "email", "phone", "account_number", "routing_number", "bank_name", "st_and_apt", "city", "state", "zipcode", "country"]
+// let SUBMIT_ENDPOINT = "http://organizers-microservice-env.eba-sbvxbuwq.us-east-1.elasticbeanstalk.com/"
+let SUBMIT_ENDPOINT = "http://127.0.0.1:5000/"
 
 function submit_signup(){
     var data = {}
@@ -7,6 +9,14 @@ function submit_signup(){
         data[x] = $("#"+x).val()
     }
     data["non_profit"] = $("#non_profit").is(":checked")
+
+    $.ajax({
+      type: "POST",
+      url: SUBMIT_ENDPOINT + "signup",
+      dataType: "json",
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify(data)
+  });
 
     console.log(data)
 }

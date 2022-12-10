@@ -17,7 +17,7 @@ def insert_into_table(table_name, data: list):
     cursor = get_db_cursor()
     sql_command = f'insert into {table_name} ({",".join(**data)})'
     cursor.execute(sql_command)
-    print("Insertion successful")
+    print(f"Insertion into {table_name} successful")
 
 
 def generate_where_params_string(where_params: dict):
