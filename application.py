@@ -11,7 +11,7 @@ ORGANIZER_DB_TABLES = {
     "address": ["org_id", "st_and_apt", "city", "state", "zipcode", "country"],
 }
 
-MOST_RECENT_ORGANIZER_ID = 0
+MOST_RECENT_ORGANIZER_ID = "0"
 
 
 @application.route("/", methods=["GET"])
@@ -31,7 +31,7 @@ def onboard_user():
     """
     # update global org id, TODO: read most recent org id from an organizers table
     global MOST_RECENT_ORGANIZER_ID
-    MOST_RECENT_ORGANIZER_ID += 1
+    MOST_RECENT_ORGANIZER_ID = str(int(MOST_RECENT_ORGANIZER_ID) + 1)
 
     request_data = request.get_json()
     request_data["org_id"] = MOST_RECENT_ORGANIZER_ID

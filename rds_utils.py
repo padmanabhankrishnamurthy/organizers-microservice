@@ -1,23 +1,30 @@
 import pymysql
 
 # rds cred
-RDS_HOST = "http://e61561.c4dwsoa8ic0w.us-east-1.rds.amazonaws.com/"
+RDS_HOST = "nimbus-db.c4dwsoa8ic0w.us-east-1.rds.amazonaws.com"
 RDS_USERNAME = "admin"
 RDS_PASSWORD = "dbpassword"
+RDS_PORT = 3306
 
 
 def get_db_cursor():
-    db = pymysql.connect(host=RDS_HOST, user=RDS_USERNAME, password=RDS_PASSWORD)
+    db = pymysql.connect(
+        host=RDS_HOST, user=RDS_USERNAME, password=RDS_PASSWORD, port=RDS_PORT
+    )
     cursor = db.cursor()
     cursor.execute("""use organizer""")
-    return cursor
+    return cursor, db
 
 
 def insert_into_table(table_name, data: list):
-    cursor = get_db_cursor()
-    sql_command = f'insert into {table_name} ({",".join(**data)})'
+    cursor, db = get_db_cursor()
+    sql_command = (
+        f'insert into {table_name} values ({",".join([str(item) for item in data])})'
+    )
+    print(sql_command)
     cursor.execute(sql_command)
-    print(f"Insertion into {table_name} successful")
+    db.commit()
+    print(f"Insertion into {table_name} successful\n")
 
 
 def generate_where_params_string(where_params: dict):
@@ -58,13 +65,14 @@ def delete_from_table(table_name, where_params: dict):
     eg: for "delete from * where city='bangalore' and age>=30" the data dict would be
     {"city":("=","bangalore"), "age":(">=", 30)}
     """
-    cursor = get_db_cursor()
+    cursor, db = get_db_cursor()
     where_params_string = "and".join(
         [f"{key}{value}" for key, value in where_params.items()]
     )
     sql_command = f"delete from {table_name} where {where_params_string}"
     cursor.execute(sql_command)
-    print("Deletion successful")
+    db.commit()
+    print("Deletion successful\n")
 
 
 def update_table(table_name, update_params: dict, where_params: dict):
@@ -72,7 +80,7 @@ def update_table(table_name, update_params: dict, where_params: dict):
     param update_params: dictionary of update params formatted as {key:value}
     param where_params: dictionary of where params formatted as {key:(condition, value)}, see example in delete_from_table() docstring
     """
-    cursor = get_db_cursor()
+    cursor, db = get_db_cursor()
 
     update_params_string = generate_params_string(update_params=update_params)
     where_params_string = generate_params_string(where_params=where_params)
@@ -81,4 +89,5 @@ def update_table(table_name, update_params: dict, where_params: dict):
     )
 
     cursor.execute(sql_command)
-    print("Update completed.")
+    db.commit()
+    print("Update completed\n")
