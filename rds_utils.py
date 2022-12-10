@@ -1,44 +1,9 @@
 import pymysql
-from datetime import datetime
 
 # rds cred
 RDS_HOST = "http://e61561.c4dwsoa8ic0w.us-east-1.rds.amazonaws.com/"
 RDS_USERNAME = "admin"
 RDS_PASSWORD = "dbpassword"
-
-
-def insert_into_table(table_name, data: list):
-    cursor = get_db_cursor()
-    sql_command = f'insert into {table_name} ({",".join(**data)})'
-    cursor.execute(sql_command)
-    print("Insertion successful")
-
-
-def delete_from_table(table_name, delete_params: dict):
-    """
-    param data: dictionary of delete params formatted as {key:(condition, value)}
-    NOTE: string values should be passed with quotes
-    eg: for "delete from * where city='bangalore' and age>=30" the data dict would be
-    {"city":("=","bangalore"), "age":(">=", 30)}
-    """
-    cursor = get_db_cursor()
-    delete_params_string = "and".join(
-        [f"{key}{value}" for key, value in delete_params.items()]
-    )
-    sql_command = f"delete from {table_name} where {delete_params_string}"
-    cursor.execute(sql_command)
-    print("Deletion successful")
-
-
-def update_table(table_name, update_params: dict, where_params: dict):
-    """
-    param update_params: dictionary of update params formatted as {key:value}
-    param where_params: dictionary of where params formatted as {key:<condition><value>}, see example in delete_from_table() docstring
-    NOTE: again, string values should be passed with quotes eg: "where city="bangalore"" should be passed as {'city':'"bangalore"'}
-    """
-    cursor = get_db_cursor()
-    update_params_string = ','.join([f"{key}={value}"])
-    where_params_string = "and".join([f"{key}{value}" for key,value in where_params.items()])
 
 
 def get_db_cursor():
@@ -48,96 +13,72 @@ def get_db_cursor():
     return cursor
 
 
-def db_insert_all_requests(original_video_url, source_language, target_language, email):
+def insert_into_table(table_name, data: list):
     cursor = get_db_cursor()
-    sql = """insert into all_requests (original_video_url, source_language, target_language, email, time)
-    values ('%s','%s','%s','%s','%s')""" % (
-        original_video_url,
-        source_language,
-        target_language,
-        email,
-        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    sql_command = f'insert into {table_name} ({",".join(**data)})'
+    cursor.execute(sql_command)
+    print("Insertion successful")
+
+
+def generate_where_params_string(where_params: dict):
+    """
+    where_params: {key: (condition, value)}
+    """
+    string = ""
+    for key, value in where_params.items():
+        operator, operand = value[0], value[1]
+
+        if type(operand) == str:
+            operand = f'"{operand}"'
+
+        string += f"{key}{operator}{operand} and"
+
+    # trim the trailing and
+    return string[: string.rfind(" and")]
+
+
+def generate_params_string(params: dict):
+    """
+    params: {key:value}
+    """
+    string = ""
+    for key, value in params.items():
+        if type(value) == str:
+            value = f'"{value}"'
+        string += f"{value}, "
+
+    # trim the trailing comma
+    return string[: string.rfind(",")]
+
+
+def delete_from_table(table_name, where_params: dict):
+    """
+    param data: dictionary of delete params formatted as {key:(condition, value)}
+    NOTE: string values should be passed with quotes
+    eg: for "delete from * where city='bangalore' and age>=30" the data dict would be
+    {"city":("=","bangalore"), "age":(">=", 30)}
+    """
+    cursor = get_db_cursor()
+    where_params_string = "and".join(
+        [f"{key}{value}" for key, value in where_params.items()]
     )
-    cursor.execute(sql)
-    cursor.connection.commit()
+    sql_command = f"delete from {table_name} where {where_params_string}"
+    cursor.execute(sql_command)
+    print("Deletion successful")
 
 
-def db_insert_waitlist(name, email):
+def update_table(table_name, update_params: dict, where_params: dict):
+    """
+    param update_params: dictionary of update params formatted as {key:value}
+    param where_params: dictionary of where params formatted as {key:(condition, value)}, see example in delete_from_table() docstring
+    """
     cursor = get_db_cursor()
-    sql = """insert into waitlist (name, email, time)
-    values ('%s','%s','%s')""" % (
-        name,
-        email,
-        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+
+    update_params_string = generate_params_string(update_params=update_params)
+    where_params_string = generate_params_string(where_params=where_params)
+    sql_command = (
+        f"update  {table_name} set {update_params_string} where {where_params_string}"
     )
-    cursor.execute(sql)
-    cursor.connection.commit()
 
-
-def db_insert_translate_requests(
-    email,
-    source_language,
-    target_language,
-    original_video_url,
-    platform,
-    video_id,
-    translated_video_url="",
-    status="processing",
-):
-    cursor = get_db_cursor()
-    sql = """insert into translate_requests (email,source_language,target_language,original_video_url,platform,video_id, translated_video_url, status, time)
-    values ('%s','%s','%s','%s','%s','%s','%s','%s','%s')""" % (
-        email,
-        source_language,
-        target_language,
-        original_video_url,
-        platform,
-        video_id,
-        translated_video_url,
-        status,
-        datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    )
-    cursor.execute(sql)
-    cursor.connection.commit()
-
-
-def db_select_translate_requests(
-    platform, video_id, source_language, target_language, email=None
-):
-    cursor = get_db_cursor()
-    if email:
-        sql = f"""select * from translate_requests
-        where platform='%s' and video_id='%s' and source_language='%s' and target_language='%s' and email='%s' """ % (
-            platform,
-            video_id,
-            source_language,
-            target_language,
-            email,
-        )
-    else:
-        sql = f"""select * from translate_requests
-        where platform='%s' and video_id='%s' and source_language='%s' and target_language='%s' """ % (
-            platform,
-            video_id,
-            source_language,
-            target_language,
-        )
-    cursor.execute(sql)
-    return cursor.fetchall()
-
-
-def db_update_translate_requests_completed(
-    platform, video_id, source_language, target_language, translated_video_url
-):
-    cursor = get_db_cursor()
-    sql = f"""update translate_requests
-    set status='completed', translated_video_url='%s'
-    where platform='%s' and video_id='%s' and source_language='%s' and target_language='%s' """ % (
-        translated_video_url,
-        platform,
-        video_id,
-        source_language,
-        target_language,
-    )
-    cursor.execute(sql)
-    cursor.connection.commit()
+    cursor.execute(sql_command)
+    print("Update completed.")
