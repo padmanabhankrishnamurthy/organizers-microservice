@@ -16,6 +16,18 @@ def get_db_cursor():
     return cursor, db
 
 
+def get_current_max_org_id():
+    cursor, db = get_db_cursor()
+
+    sql_command = "select max(cast(org_id) as unsigned) as max_org_id from organizers"
+    print(sql_command)
+    cursor.execute(sql_command)
+
+    result = cursor.fetchone()
+    print(f"Max org_id: {result}")
+    return result
+
+
 def read_all_fields_from_table(table_name, where_params: dict):
     cursor, db = get_db_cursor()
 
@@ -79,12 +91,13 @@ def delete_from_table(table_name, where_params: dict):
     {"city":("=","bangalore"), "age":(">=", 30)}
     """
     cursor, db = get_db_cursor()
-    where_params_string = "and".join(
-        [f"{key}{value}" for key, value in where_params.items()]
-    )
+    where_params_string = generate_where_params_string(where_params=where_params)
+
     sql_command = f"delete from {table_name} where {where_params_string}"
+    print(sql_command)
     cursor.execute(sql_command)
     db.commit()
+
     print("Deletion successful\n")
 
 

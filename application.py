@@ -86,10 +86,12 @@ def update_account():
 def delete_account():
     """
     request body is where_params that goes straight into delete_from_table()
+    in this case, where params should be {"org_id": org_id_to_delete}
     """
     request_data = request.get_json()
 
-    for table_name in ORGANIZER_DB_TABLES.keys():
+    # reverse the order of table deletion so that foreign key referencers are deleted first, and the og key deleted last
+    for table_name in list(ORGANIZER_DB_TABLES.keys())[::-1]:
         delete_from_table(table_name=table_name, where_params=request_data)
 
     return jsonify({"status": "account deleted"})
