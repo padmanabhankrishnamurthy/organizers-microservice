@@ -16,6 +16,20 @@ def get_db_cursor():
     return cursor, db
 
 
+def read_all_fields_from_table(table_name, where_params: dict):
+    cursor, db = get_db_cursor()
+
+    where_params_string = generate_where_params_string(where_params=where_params)
+    sql_command = f"select * from {table_name} where {where_params_string}"
+
+    print(sql_command)
+    cursor.execute(sql_command)
+
+    result = cursor.fetchone()
+    print(f"Result: {result}")
+    return result
+
+
 def insert_into_table(table_name, data: list):
     cursor, db = get_db_cursor()
     sql_command = (
@@ -29,16 +43,15 @@ def insert_into_table(table_name, data: list):
 
 def generate_where_params_string(where_params: dict):
     """
-    where_params: {key: (condition, value)}
+    where_params: {key: value}
     """
     string = ""
     for key, value in where_params.items():
-        operator, operand = value[0], value[1]
 
-        if type(operand) == str:
-            operand = f'"{operand}"'
+        if type(value) == str:
+            value = f'"{value}"'
 
-        string += f"{key}{operator}{operand} and"
+        string += f"{key}={value} and"
 
     # trim the trailing and
     return string[: string.rfind(" and")]

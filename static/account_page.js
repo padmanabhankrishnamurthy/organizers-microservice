@@ -17,7 +17,7 @@ var temp_object = {
 function load_info(){
     for (const x of form_fields){
         //TODO replace temp object with account_info
-        $("#"+x).html(temp_object[x])
+        $("#"+x).html(account_info[x])
     }
 }
 

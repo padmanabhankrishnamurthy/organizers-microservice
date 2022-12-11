@@ -1,6 +1,11 @@
 from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from rds_utils import insert_into_table, update_table, delete_from_table
+from rds_utils import (
+    insert_into_table,
+    update_table,
+    delete_from_table,
+    read_all_fields_from_table,
+)
 
 application = Flask(__name__)
 CORS(application)
@@ -19,12 +24,33 @@ def welcome():
     return "Hello World!"
 
 
+@application.route("/account_page/<org_id>", methods=["GET"])
+def account_page(org_id):
+    account_info = {}
+    where_params = {"org_id": org_id}
+
+    for table_name, columns in ORGANIZER_DB_TABLES.items():
+        row = read_all_fields_from_table(
+            table_name=table_name, where_params=where_params
+        )
+        info = zip(columns, row)
+        account_info.update(info)
+
+    print(f"Account Info: {account_info}")
+    return render_template("account_page.html", account_info=account_info)
+
+
+@application.route("/login_page", methods=["GET"])
+def login_page():
+    return render_template("login_page.html")
+
+
 @application.route("/signup_page", methods=["GET"])
 def signup_page():
     return render_template("organizer_signup.html")
 
 
-@application.route("/signup", methods=["POST"])
+@application.route("/signup_api", methods=["POST"])
 def onboard_user():
     """
     request body is the request_data that goes into insert_int_table
@@ -46,7 +72,7 @@ def onboard_user():
     return jsonify({"status": "signup insertion completed"})
 
 
-@application.route("/update", methods=["POST"])
+@application.route("/update_api", methods=["POST"])
 def update_account():
     """
     request body is {"update_params":{update_params}, "where_params":{where_params}}
@@ -56,7 +82,7 @@ def update_account():
     return jsonify({"status": "account update completed"})
 
 
-@application.route("/delete_account", methods=["POST"])
+@application.route("/delete_account_api", methods=["POST"])
 def delete_account():
     """
     request body is where_params that goes straight into delete_from_table()

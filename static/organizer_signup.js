@@ -17,7 +17,7 @@ function submit_signup(){
     //        else create account and lof it in db
     $.ajax({
       type: "POST",
-      url: SUBMIT_ENDPOINT + "signup",
+      url: SUBMIT_ENDPOINT + "signup_api",
       dataType: "json",
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify(data)
