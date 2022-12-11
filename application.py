@@ -45,12 +45,12 @@ def login_page():
     return render_template("login_page.html")
 
 
-@application.route("/signup_page", methods=["GET"])
-def signup_page():
-    return render_template("organizer_signup.html")
+@application.route("/onboard_page", methods=["GET"])
+def onboard_page():
+    return render_template("organizer_onboard.html")
 
 
-@application.route("/signup_api", methods=["POST"])
+@application.route("/onboard_api", methods=["POST"])
 def onboard_user():
     """
     request body is the request_data that goes into insert_int_table
@@ -69,7 +69,7 @@ def onboard_user():
             data=[request_data[column_name] for column_name in column_names],
         )
 
-    return jsonify({"status": "signup insertion completed"})
+    return jsonify({"status": "onboard insertion completed"})
 
 
 @application.route("/update_api", methods=["POST"])
