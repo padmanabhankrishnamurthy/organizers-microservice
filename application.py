@@ -23,6 +23,16 @@ def welcome():
     return "Hello World!"
 
 
+@application.route("/login_page", methods=["GET"])
+def login_page():
+    return render_template("login_page.html")
+
+
+@application.route("/onboard_page", methods=["GET"])
+def onboard_page():
+    return render_template("organizer_onboard.html")
+
+
 @application.route("/account_page/<org_id>", methods=["GET"])
 def account_page(org_id):
     account_info = {}
@@ -38,15 +48,20 @@ def account_page(org_id):
     print(f"Account Info: {account_info}")
     return render_template("account_page.html", account_info=account_info)
 
+@application.route("/edit_page/<org_id>", methods=["GET"])
+def edit_page(org_id):
+    account_info = {}
+    where_params = {"org_id": org_id}
 
-@application.route("/login_page", methods=["GET"])
-def login_page():
-    return render_template("login_page.html")
+    for table_name, columns in ORGANIZER_DB_TABLES.items():
+        row = read_all_fields_from_table(
+            table_name=table_name, where_params=where_params
+        )
+        info = zip(columns, row)
+        account_info.update(info)
 
-
-@application.route("/onboard_page", methods=["GET"])
-def onboard_page():
-    return render_template("organizer_onboard.html")
+    print(f"Account Info: {account_info}")
+    return render_template("edit_info.html", account_info=account_info)
 
 
 @application.route("/onboard_api", methods=["POST"])

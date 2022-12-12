@@ -40,9 +40,9 @@ function submit_edit(){
 function load_info(){
     for (const x of form_fields){
         //TODO replace temp object with account_info
-        $("#"+x).val(temp_object[x])
+        $("#"+x).val(account_info[x])
     }
-    $('#non_profit').prop('checked', temp_object["non_profit"]);
+    $('#non_profit').prop('checked', account_info["non_profit"]);
 }
 
 $("#document").ready(function() {
