@@ -1,5 +1,7 @@
 form_fields = ["org_name", "email", "phone", "account_number", "routing_number", "bank_name", "st_and_apt", "city", "state", "zipcode", "country"]
-var EDIT_PAGE_URL = "http://127.0.0.1:5000/edit_page/"
+var BASE_URL = "http://127.0.0.1:5000/"
+var EDIT_PAGE_URL = BASE_URL + "edit_page"
+var DELETE_ENDPOINT = BASE_URL + "delete_account_api"
 
 var temp_object = {
     "org_name": "apple", 
@@ -17,13 +19,24 @@ var temp_object = {
 
 function load_info(){
     for (const x of form_fields){
-        //TODO replace temp object with account_info
         $("#"+x).html(account_info[x])
     }
 }
 
 function delete_account(){
-    //Send Ajax delete request. Then log out of account.
+    var org_id = window.location.href.split("/").at(-1)
+
+    $.ajax({
+        type: "POST",
+        url: DELETE_ENDPOINT,
+        dataType: "json",
+        contentType: "application/json; charset=utf-8",
+        data: JSON.stringify({"org_id":org_id}),
+        success: function(result) {
+            // TODO: logout
+            window.location.href = BASE_URL
+        }
+      });
 }
 
 function edit_page(){
