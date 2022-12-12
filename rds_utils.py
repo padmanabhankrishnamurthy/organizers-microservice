@@ -63,10 +63,17 @@ def read_all_fields_from_table(table_name, where_params: dict):
 
 def insert_into_table(table_name, data: list):
     cursor, db = get_db_cursor()
-    sql_command = (
-        f'insert into {table_name} values ({",".join([str(item) for item in data])})'
-    )
+
+    items_string = ""
+    for element in data:
+        if type(element) == str:
+            items_string += f'"{element}", '
+        else:
+            items_string += f"{element}, "
+    items_string = items_string[: items_string.rfind(", ")]
+    sql_command = f"insert into {table_name} values ({items_string})"
     print(sql_command)
+
     cursor.execute(sql_command)
     db.commit()
     print(f"Insertion into {table_name} successful\n")
