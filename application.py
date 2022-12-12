@@ -17,6 +17,12 @@ ORGANIZER_DB_TABLES = {
     "address": ["org_id", "st_and_apt", "city", "state", "zipcode", "country"],
 }
 
+# inverse of ORGANIZER_DB_TABLES
+COLUMN_TABLE_MAPPING = {}
+for table_name, columns in ORGANIZER_DB_TABLES.items():
+    for column in columns:
+        COLUMN_TABLE_MAPPING[column] = table_name
+
 
 @application.route("/", methods=["GET"])
 def welcome():
@@ -47,6 +53,7 @@ def account_page(org_id):
 
     print(f"Account Info: {account_info}")
     return render_template("account_page.html", account_info=account_info)
+
 
 @application.route("/edit_page/<org_id>", methods=["GET"])
 def edit_page(org_id):
@@ -82,7 +89,9 @@ def onboard_user():
             data=[request_data[column_name] for column_name in column_names],
         )
 
-    return jsonify({"status": "onboard insertion completed", "org_id":request_data["org_id"]})
+    return jsonify(
+        {"status": "onboard insertion completed", "org_id": request_data["org_id"]}
+    )
 
 
 @application.route("/edit_api", methods=["POST"])
@@ -91,9 +100,29 @@ def update_account():
     request body is {"update_params":{update_params}, "where_params":{"org_id":org_id}}
     """
     request_data = request.get_json()
-    print(f'Request: {request_data}')
+    print(f"Request: {request_data}")
 
-    # for table_name in 
+    update_params = request_data["update_params"]
+
+    # incoming update_params is {column:value}, but update_table() needs table_name
+    # so create update_tables where update_tables[table_name] = {update_params of columns beloning to table_name}
+    update_tables = {table_name: {} for table_name in ORGANIZER_DB_TABLES}
+    for update_column, value in update_params.items():
+        update_column_table = COLUMN_TABLE_MAPPING[
+            update_column
+        ]  # table to which update_column belongs
+        update_tables[update_column_table][update_column] = value
+
+    print(f'update_tables: {update_tables}')
+
+    for table_name, update_params in update_tables.items():
+        if len(update_params.keys()) == 0:
+            continue
+        update_table(
+            table_name=table_name,
+            update_params=update_params,
+            where_params=request_data["where_params"],
+        )
 
     return jsonify({"status": "account update completed"})
 

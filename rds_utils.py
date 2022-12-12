@@ -16,34 +16,20 @@ def get_db_cursor():
     return cursor, db
 
 
-def generate_where_params_string(where_params: dict):
+def generate_params_string(params: dict, conjunction="and"):
     """
-    where_params: {key: value}
-    """
-    string = ""
-    for key, value in where_params.items():
-
-        if type(value) == str:
-            value = f'"{value}"'
-
-        string += f"{key}={value} and"
-
-    # trim the trailing and
-    return string[: string.rfind(" and")]
-
-
-def generate_params_string(params: dict):
-    """
-    params: {key:value}
+    params: {key: value}
     """
     string = ""
     for key, value in params.items():
+
         if type(value) == str:
             value = f'"{value}"'
-        string += f"{value}, "
 
-    # trim the trailing comma
-    return string[: string.rfind(",")]
+        string += f"{key}={value} {conjunction} "
+
+    # trim the trailing and
+    return string[: string.rfind(f" {conjunction}")]
 
 
 def get_current_max_org_id():
@@ -64,7 +50,7 @@ def get_current_max_org_id():
 def read_all_fields_from_table(table_name, where_params: dict):
     cursor, db = get_db_cursor()
 
-    where_params_string = generate_where_params_string(where_params=where_params)
+    where_params_string = generate_params_string(params=where_params)
     sql_command = f"select * from {table_name} where {where_params_string}"
 
     print(sql_command)
@@ -94,7 +80,7 @@ def delete_from_table(table_name, where_params: dict):
     {"city":("=","bangalore"), "age":(">=", 30)}
     """
     cursor, db = get_db_cursor()
-    where_params_string = generate_where_params_string(where_params=where_params)
+    where_params_string = generate_params_string(params=where_params)
 
     sql_command = f"delete from {table_name} where {where_params_string}"
     print(sql_command)
@@ -111,8 +97,8 @@ def update_table(table_name, update_params: dict, where_params: dict):
     """
     cursor, db = get_db_cursor()
 
-    update_params_string = generate_params_string(update_params=update_params)
-    where_params_string = generate_where_params_string(where_params=where_params)
+    update_params_string = generate_params_string(params=update_params, conjunction=",")
+    where_params_string = generate_params_string(params=where_params)
     sql_command = (
         f"update  {table_name} set {update_params_string} where {where_params_string}"
     )
