@@ -5,6 +5,7 @@ from rds_utils import (
     update_table,
     delete_from_table,
     read_all_fields_from_table,
+    get_current_max_org_id,
 )
 
 application = Flask(__name__)
@@ -15,8 +16,6 @@ ORGANIZER_DB_TABLES = {
     "banking_info": ["org_id", "routing_number", "account_number", "bank_name"],
     "address": ["org_id", "st_and_apt", "city", "state", "zipcode", "country"],
 }
-
-MOST_RECENT_ORGANIZER_ID = "0"
 
 
 @application.route("/", methods=["GET"])
@@ -55,12 +54,11 @@ def onboard_user():
     """
     request body is the request_data that goes into insert_int_table
     """
-    # update global org id, TODO: read most recent org id from an organizers table
-    global MOST_RECENT_ORGANIZER_ID
-    MOST_RECENT_ORGANIZER_ID = str(int(MOST_RECENT_ORGANIZER_ID) + 1)
 
     request_data = request.get_json()
-    request_data["org_id"] = MOST_RECENT_ORGANIZER_ID
+
+    current_max_org_id = get_current_max_org_id()
+    request_data["org_id"] = current_max_org_id + 1
 
     # insert into all tables
     for table_name, column_names in ORGANIZER_DB_TABLES.items():

@@ -19,13 +19,16 @@ def get_db_cursor():
 def get_current_max_org_id():
     cursor, db = get_db_cursor()
 
-    sql_command = "select max(cast(org_id) as unsigned) as max_org_id from organizers"
+    sql_command = "select max(cast(org_id as unsigned)) from contact_info"
     print(sql_command)
     cursor.execute(sql_command)
 
-    result = cursor.fetchone()
+    result = cursor.fetchone()[0]
     print(f"Max org_id: {result}")
-    return result
+    if result:
+        return result
+    else:
+        return 0
 
 
 def read_all_fields_from_table(table_name, where_params: dict):
