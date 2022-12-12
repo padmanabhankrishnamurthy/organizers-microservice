@@ -1,4 +1,5 @@
 form_fields = ["org_name", "email", "phone", "account_number", "routing_number", "bank_name", "st_and_apt", "city", "state", "zipcode", "country"]
+var EDIT_PAGE_URL = "http://127.0.0.1:5000/edit_page/"
 
 var temp_object = {
     "org_name": "apple", 
@@ -26,7 +27,8 @@ function delete_account(){
 }
 
 function edit_page(){
-    //Route to edit_info.html
+    var org_id = window.location.href.split("/").at(-1)
+    window.location.href = EDIT_PAGE_URL + org_id
 }
 
 $("#document").ready(function() {

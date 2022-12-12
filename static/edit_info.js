@@ -25,14 +25,16 @@ function submit_edit(){
     }
     data["non_profit"] = $("#non_profit").is(":checked")
 
+    var org_id = window.location.href.split("/").at(-1)
+
     // AJAX edit info endpoint
-    // $.ajax({
-    //   type: "POST",
-    //   url: SUBMIT_ENDPOINT + "onboard_api",
-    //   dataType: "json",
-    //   contentType: "application/json; charset=utf-8",
-    //   data: JSON.stringify(data)
-    // });
+    $.ajax({
+      type: "POST",
+      url: SUBMIT_ENDPOINT + "edit_api",
+      dataType: "json",
+      contentType: "application/json; charset=utf-8",
+      data: JSON.stringify({"update_params":data, "where_params":{"org_id":org_id}})
+    });
 
     console.log(data)
 }

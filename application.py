@@ -82,16 +82,19 @@ def onboard_user():
             data=[request_data[column_name] for column_name in column_names],
         )
 
-    return jsonify({"status": "onboard insertion completed"})
+    return jsonify({"status": "onboard insertion completed", "org_id":request_data["org_id"]})
 
 
-@application.route("/update_api", methods=["POST"])
+@application.route("/edit_api", methods=["POST"])
 def update_account():
     """
-    request body is {"update_params":{update_params}, "where_params":{where_params}}
+    request body is {"update_params":{update_params}, "where_params":{"org_id":org_id}}
     """
     request_data = request.get_json()
-    update_table(request_data["update_params"], request_data["where_params"])
+    print(f'Request: {request_data}')
+
+    # for table_name in 
+
     return jsonify({"status": "account update completed"})
 
 

@@ -1,6 +1,7 @@
 form_fields = ["org_name", "email", "phone", "account_number", "routing_number", "bank_name", "st_and_apt", "city", "state", "zipcode", "country"]
 // let SUBMIT_ENDPOINT = "http://organizers-microservice-env.eba-sbvxbuwq.us-east-1.elasticbeanstalk.com/"
 let SUBMIT_ENDPOINT = "http://127.0.0.1:5000/"
+let ACCOUNT_PAGE_URL = "http://127.0.0.1:5000/account_page/"
 
 function submit_signup(){
     var data = {}
@@ -20,7 +21,11 @@ function submit_signup(){
       url: SUBMIT_ENDPOINT + "onboard_api",
       dataType: "json",
       contentType: "application/json; charset=utf-8",
-      data: JSON.stringify(data)
+      data: JSON.stringify(data),
+      success: function(result) {
+        var org_id = result["org_id"]
+        window.location.href = ACCOUNT_PAGE_URL + org_id
+      }
   });
 
     console.log(data)
