@@ -21,10 +21,22 @@ function load_info(){
     }
 }
 
+function delete_account(){
+    //Send Ajax delete request. Then log out of account.
+}
+
+function edit_page(){
+    //Route to edit_info.html
+}
 
 $("#document").ready(function() {
     load_info()
 
-    //TODO:
-    //1. edit button routes to edit_page.html which isn't complete yet
+    $("#edit_info").click(function(){
+        edit_page()
+    })
+
+    $("#delete_account").click(function() {
+        delete_account()
+    })
 })
