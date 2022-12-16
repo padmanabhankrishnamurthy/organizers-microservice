@@ -69,6 +69,11 @@ def onboard_page():
     return render_template("organizer_onboard.html")
 
 
+@application.route("/display_events_page", methods=["GET"])
+def display_events():
+    return render_template("display_events.html")
+
+
 @application.route("/account_page/<org_id>", methods=["GET"])
 def account_page(org_id):
     account_info = {}
