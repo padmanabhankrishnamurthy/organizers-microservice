@@ -12,9 +12,39 @@ application = Flask(__name__)
 CORS(application)
 
 ORGANIZER_DB_TABLES = {
-    "contact_info": ["org_id", "org_name", "non_profit", "email", "phone"],
-    "banking_info": ["org_id", "routing_number", "account_number", "bank_name"],
-    "address": ["org_id", "st_and_apt", "city", "state", "zipcode", "country"],
+    "contact_info": [
+        "org_id",
+        "org_name",
+        "non_profit",
+        "email",
+        "phone",
+    ],
+    "banking_info": [
+        "org_id",
+        "routing_number",
+        "account_number",
+        "bank_name",
+    ],
+    "address": [
+        "org_id",
+        "st_and_apt",
+        "city",
+        "state",
+        "zipcode",
+        "country",
+    ],
+    "events": [
+        "event_id",
+        "org_id",
+        "date",
+        "start_time",
+        "end_time",
+        "description",
+        "event_category",
+        "capacity",
+        "event_name",
+        "image",
+    ],
 }
 
 # inverse of ORGANIZER_DB_TABLES
@@ -71,6 +101,13 @@ def edit_page(org_id):
     return render_template("edit_info.html", account_info=account_info)
 
 
+@application.route("/add_event_page/<org_id>", methods=["GET"])
+def add_event_page(org_id):
+    account_info = {}
+    where_params = {"org_id": org_id}
+    return render_template("add_event.html", account_info=account_info)
+
+
 @application.route("/onboard_api", methods=["POST"])
 def onboard_user():
     """
@@ -113,7 +150,7 @@ def update_account():
         ]  # table to which update_column belongs
         update_tables[update_column_table][update_column] = value
 
-    print(f'update_tables: {update_tables}')
+    print(f"update_tables: {update_tables}")
 
     for table_name, update_params in update_tables.items():
         if len(update_params.keys()) == 0:
@@ -125,6 +162,13 @@ def update_account():
         )
 
     return jsonify({"status": "account update completed"})
+
+
+@application.route("/add_event_api", methods=["POST"])
+def add_event():
+    request_data = request.get_json()
+    insert_into_table(table_name="events", data=request_data)
+    return jsonify({"status": "event created"})
 
 
 @application.route("/delete_account_api", methods=["POST"])
