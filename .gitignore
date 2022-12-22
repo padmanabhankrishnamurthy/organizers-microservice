@@ -1,1 +1,5 @@
-db_setup/.ipynb_checkpoints
+db_setup/
+# Elastic Beanstalk Files
+.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

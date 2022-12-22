@@ -33,18 +33,18 @@ ORGANIZER_DB_TABLES = {
         "zipcode",
         "country",
     ],
-    "events": [
-        "event_id",
-        "org_id",
-        "date",
-        "start_time",
-        "end_time",
-        "description",
-        "event_category",
-        "capacity",
-        "event_name",
-        "image",
-    ],
+#     "events": [
+#         "event_id",
+#         "org_id",
+#         "date",
+#         "start_time",
+#         "end_time",
+#         "description",
+#         "event_category",
+#         "capacity",
+#         "event_name",
+#         "image",
+#     ],
 }
 
 # inverse of ORGANIZER_DB_TABLES

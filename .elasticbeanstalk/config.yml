@@ -3,12 +3,16 @@ branch-defaults:
     environment: organizers-microservice-env
     group_suffix: null
 global:
-  application_name: organizers-microservice-app
-  default_ec2_keyname: coms6156-aws-ec2-key-pair
+  application_name: organizers-microservice
+  branch: null
+  default_ec2_keyname: organizers-microservice-keypair
   default_platform: Python 3.7
   default_region: us-east-1
+  include_git_submodules: true
   instance_profile: null
   platform_name: null
   platform_version: null
   profile: coms6156
+  repository: null
+  sc: git
   workspace_type: Application
