@@ -1,5 +1,5 @@
 form_fields = ["org_name", "email", "phone", "account_number", "routing_number", "bank_name", "st_and_apt", "city", "state", "zipcode", "country"]
-var BASE_URL = "http://127.0.0.1:5000/"
+var BASE_URL = "https://127.0.0.1:5000/"
 var EDIT_PAGE_URL = BASE_URL + "edit_page/"
 var DELETE_ENDPOINT = BASE_URL + "delete_account_api"
 

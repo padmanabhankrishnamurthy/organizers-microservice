@@ -1,7 +1,7 @@
 form_fields = ["org_name", "email", "phone", "account_number", "routing_number", "bank_name", "st_and_apt", "city", "state", "zipcode", "country"]
 // let SUBMIT_ENDPOINT = "http://organizers-microservice-env.eba-sbvxbuwq.us-east-1.elasticbeanstalk.com/"
-let SUBMIT_ENDPOINT = "http://127.0.0.1:5000/"
-let ACCOUNT_PAGE_URL = "http://127.0.0.1:5000/account_page/"
+let SUBMIT_ENDPOINT = "https://127.0.0.1:5000/"
+let ACCOUNT_PAGE_URL = "https://127.0.0.1:5000/account_page/"
 
 var temp_object = {
     "org_name": "apple", 
@@ -36,7 +36,7 @@ function submit_edit(){
       contentType: "application/json; charset=utf-8",
       data: JSON.stringify({"update_params":data, "where_params":{"org_id":org_id}}),
       success: function(result) {
-        window.location.href = ACCOUNT_PAGE_URL + org_id
+        window.location.href = ACCOUNT_PAGE_URL
       }
     });
 

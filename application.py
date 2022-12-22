@@ -85,10 +85,9 @@ def load_user(user_id):
 def index():
     if current_user.is_authenticated:
         return (
-            "<p>Hello, {}! You're logged in! Email: {}</p>"
-            '<a class="button" href="/logout">Logout</a>'.format(
-                current_user.name, current_user.email
-            )
+            f"""<p>Hello, {current_user.name}! You're logged in! Email: {current_user.email}</p>
+            <a class="button" href="/logout">Logout</a>
+            <p><a class="button" href="/account_page">Dashboard</a></p>"""
         )
     else:
         return '<a class="button" href="/login">Google Login</a>'
@@ -163,8 +162,8 @@ def callback():
     # Begin user session by logging the user in
     login_user(user)
 
-    # Send user back to homepage
-    return redirect(url_for("index"))
+    # Send user back to account page, which will in turn send them to onboard page if they aren't registered
+    return redirect(url_for("account_page"))
 
 
 @application.route("/logout")
@@ -313,5 +312,5 @@ def delete_account():
 
 
 if __name__ == "__main__":
-    # application.run(debug=True, ssl_context="adhoc")
-    application.run(debug=True)
+    application.run(debug=True, ssl_context="adhoc")
+    # application.run(debug=True)
