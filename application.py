@@ -1,4 +1,14 @@
-from flask import Flask, request, jsonify, render_template
+import os
+from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask_login import (
+    LoginManager,
+    current_user,
+    login_required,
+    login_user,
+    logout_user,
+)
+from oauthlib.oauth2 import WebApplicationClient
+import requests
 from flask_cors import CORS
 from rds_utils import (
     insert_into_table,
@@ -7,9 +17,21 @@ from rds_utils import (
     read_all_fields_from_table,
     get_current_max_org_id,
 )
+from utils import get_google_ouath_keys
+from user import User
 
 application = Flask(__name__)
+application.secret_key = os.urandom(24)
 CORS(application)
+
+# google oauth config 
+GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET = get_google_ouath_keys()
+GOOGLE_DISCOVERY_URL = (
+    "https://accounts.google.com/.well-known/openid-configuration"
+)
+client = WebApplicationClient(GOOGLE_CLIENT_ID)
+login_manager = LoginManager()
+login_manager.init_app(application)
 
 ORGANIZER_DB_TABLES = {
     "contact_info": [
@@ -53,10 +75,39 @@ for table_name, columns in ORGANIZER_DB_TABLES.items():
     for column in columns:
         COLUMN_TABLE_MAPPING[column] = table_name
 
+# Flask-Login helper to retrieve a user from our db
+@login_manager.user_loader
+def load_user(user_id):
+    return User.get(user_id)
 
 @application.route("/", methods=["GET"])
 def welcome():
-    return "Hello World!"
+    if current_user.is_authenticated:
+        return (
+            "<p>Hello, {}! You're logged in! Email: {}</p>"
+            "<div><p>Google Profile Picture:</p>"
+            '<img src="{}" alt="Google profile pic"></img></div>'
+            '<a class="button" href="/logout">Logout</a>'.format(
+                current_user.name, current_user.email, current_user.profile_pic
+            )
+        )
+    else:
+        return '<a class="button" href="/login">Google Login</a>'
+
+@application.route("/login")
+def login():
+    # Find out what URL to hit for Google login
+    google_provider_cfg = requests.get(GOOGLE_DISCOVERY_URL).json()
+    authorization_endpoint = google_provider_cfg["authorization_endpoint"]
+
+    # Use library to construct the request for Google login and provide
+    # scopes that let you retrieve user's profile from Google
+    request_uri = client.prepare_request_uri(
+        authorization_endpoint,
+        redirect_uri=request.base_url + "/callback",
+        scope=["openid", "email", "profile"],
+    )
+    return redirect(request_uri)
 
 
 @application.route("/login_page", methods=["GET"])
