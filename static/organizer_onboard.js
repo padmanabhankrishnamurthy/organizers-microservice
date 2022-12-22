@@ -1,7 +1,7 @@
 form_fields = ["org_name", "email", "phone", "account_number", "routing_number", "bank_name", "st_and_apt", "city", "state", "zipcode", "country"]
 // let SUBMIT_ENDPOINT = "http://organizers-microservice-env.eba-sbvxbuwq.us-east-1.elasticbeanstalk.com/"
 let SUBMIT_ENDPOINT = "https://127.0.0.1:5000/"
-let ACCOUNT_PAGE_URL = "https://127.0.0.1:5000/account_page/"
+let ACCOUNT_PAGE_URL = "https://127.0.0.1:5000/account_page"
 
 function submit_signup(){
     var data = {}

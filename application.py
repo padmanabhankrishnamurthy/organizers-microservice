@@ -84,11 +84,9 @@ def load_user(user_id):
 @application.route("/", methods=["GET"])
 def index():
     if current_user.is_authenticated:
-        return (
-            f"""<p>Hello, {current_user.name}! You're logged in! Email: {current_user.email}</p>
+        return f"""<p>Hello, {current_user.name}! You're logged in! Email: {current_user.email}</p>
             <a class="button" href="/logout">Logout</a>
             <p><a class="button" href="/account_page">Dashboard</a></p>"""
-        )
     else:
         return '<a class="button" href="/login">Google Login</a>'
 
@@ -210,10 +208,10 @@ def account_page():
     return render_template("account_page.html", account_info=account_info)
 
 
-@application.route("/edit_page/<org_id>", methods=["GET"])
-def edit_page(org_id):
+@application.route("/edit_page", methods=["GET"])
+def edit_page():
     account_info = {}
-    where_params = {"org_id": org_id}
+    where_params = {"org_id": current_user.id}
 
     for table_name, columns in ORGANIZER_DB_TABLES.items():
         row = read_all_fields_from_table(
@@ -283,7 +281,7 @@ def update_account():
         update_table(
             table_name=table_name,
             update_params=update_params,
-            where_params=request_data["where_params"],
+            where_params={"org_id": current_user.id},
         )
 
     return jsonify({"status": "account update completed"})
