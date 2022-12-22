@@ -89,7 +89,7 @@ def get_account_info(org_id):
 
 
 @application.route("/get_account_info/<org_id>", methods=["POST"])
-def account_page(org_id):
+def get_account_info_route(org_id):
     account_info = get_account_info(org_id)
     print(f"Account Info: {account_info}")
     return jsonify(account_info)
