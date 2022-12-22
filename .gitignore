@@ -3,3 +3,4 @@ db_setup/
 .elasticbeanstalk/*
 !.elasticbeanstalk/*.cfg.yml
 !.elasticbeanstalk/*.global.yml
+client_secret*

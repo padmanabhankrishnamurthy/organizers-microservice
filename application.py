@@ -33,18 +33,18 @@ ORGANIZER_DB_TABLES = {
         "zipcode",
         "country",
     ],
-#     "events": [
-#         "event_id",
-#         "org_id",
-#         "date",
-#         "start_time",
-#         "end_time",
-#         "description",
-#         "event_category",
-#         "capacity",
-#         "event_name",
-#         "image",
-#     ],
+    #     "events": [
+    #         "event_id",
+    #         "org_id",
+    #         "date",
+    #         "start_time",
+    #         "end_time",
+    #         "description",
+    #         "event_category",
+    #         "capacity",
+    #         "event_name",
+    #         "image",
+    #     ],
 }
 
 # inverse of ORGANIZER_DB_TABLES
@@ -74,8 +74,7 @@ def display_events():
     return render_template("display_events.html")
 
 
-@application.route("/account_page/<org_id>", methods=["GET"])
-def account_page(org_id):
+def get_account_info(org_id):
     account_info = {}
     where_params = {"org_id": org_id}
 
@@ -86,6 +85,19 @@ def account_page(org_id):
         info = zip(columns, row)
         account_info.update(info)
 
+    return account_info
+
+
+@application.route("/get_account_info/<org_id>", methods=["GET"])
+def account_page(org_id):
+    account_info = get_account_info(org_id)
+    print(f"Account Info: {account_info}")
+    return jsonify(account_info)
+
+
+@application.route("/account_page/<org_id>", methods=["GET"])
+def account_page(org_id):
+    account_info = get_account_info(org_id)
     print(f"Account Info: {account_info}")
     return render_template("account_page.html", account_info=account_info)
 
