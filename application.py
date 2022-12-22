@@ -88,7 +88,7 @@ def get_account_info(org_id):
     return account_info
 
 
-@application.route("/get_account_info/<org_id>", methods=["POST"])
+@application.route("/get_account_info/<org_id>", methods=["GET"])
 def get_account_info_route(org_id):
     account_info = get_account_info(org_id)
     print(f"Account Info: {account_info}")
