@@ -25,11 +25,10 @@ application = Flask(__name__)
 application.secret_key = os.urandom(24)
 CORS(application)
 
-# google oauth config 
+# google oauth config
 GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET = get_google_ouath_keys()
-GOOGLE_DISCOVERY_URL = (
-    "https://accounts.google.com/.well-known/openid-configuration"
-)
+GOOGLE_DISCOVERY_URL = "https://accounts.google.com/.well-known/openid-configuration"
+GOOGLE_PROVIDER_CFG = requests.get(GOOGLE_DISCOVERY_URL).json()
 client = WebApplicationClient(GOOGLE_CLIENT_ID)
 login_manager = LoginManager()
 login_manager.init_app(application)
@@ -56,18 +55,18 @@ ORGANIZER_DB_TABLES = {
         "zipcode",
         "country",
     ],
-#     "events": [
-#         "event_id",
-#         "org_id",
-#         "date",
-#         "start_time",
-#         "end_time",
-#         "description",
-#         "event_category",
-#         "capacity",
-#         "event_name",
-#         "image",
-#     ],
+    #     "events": [
+    #         "event_id",
+    #         "org_id",
+    #         "date",
+    #         "start_time",
+    #         "end_time",
+    #         "description",
+    #         "event_category",
+    #         "capacity",
+    #         "event_name",
+    #         "image",
+    #     ],
 }
 
 # inverse of ORGANIZER_DB_TABLES
@@ -81,25 +80,24 @@ for table_name, columns in ORGANIZER_DB_TABLES.items():
 def load_user(user_id):
     return User.get(user_id)
 
+
 @application.route("/", methods=["GET"])
-def welcome():
+def index():
     if current_user.is_authenticated:
         return (
             "<p>Hello, {}! You're logged in! Email: {}</p>"
-            "<div><p>Google Profile Picture:</p>"
-            '<img src="{}" alt="Google profile pic"></img></div>'
             '<a class="button" href="/logout">Logout</a>'.format(
-                current_user.name, current_user.email, current_user.profile_pic
+                current_user.name, current_user.email
             )
         )
     else:
         return '<a class="button" href="/login">Google Login</a>'
 
+
 @application.route("/login")
 def login():
     # Find out what URL to hit for Google login
-    google_provider_cfg = requests.get(GOOGLE_DISCOVERY_URL).json()
-    authorization_endpoint = google_provider_cfg["authorization_endpoint"]
+    authorization_endpoint = GOOGLE_PROVIDER_CFG["authorization_endpoint"]
 
     # Use library to construct the request for Google login and provide
     # scopes that let you retrieve user's profile from Google
@@ -110,6 +108,7 @@ def login():
     )
     return redirect(request_uri)
 
+
 @application.route("/login/callback")
 def callback():
     # Get authorization code Google sent back to you
@@ -117,15 +116,15 @@ def callback():
 
     # Find out what URL to hit to get tokens that allow you to ask for
     # things on behalf of a user
-    google_provider_cfg = requests.get(GOOGLE_DISCOVERY_URL).json()
-    token_endpoint = google_provider_cfg["token_endpoint"]
+    token_endpoint = GOOGLE_PROVIDER_CFG["token_endpoint"]
+    print(f"Token endpoint: {token_endpoint}")
 
     # Prepare and send a request to get tokens! Yay tokens!
     token_url, headers, body = client.prepare_token_request(
         token_endpoint,
         authorization_response=request.url,
         redirect_url=request.base_url,
-        code=code
+        code=code,
     )
     token_response = requests.post(
         token_url,
@@ -133,9 +132,46 @@ def callback():
         data=body,
         auth=(GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET),
     )
-
     # Parse the tokens!
     client.parse_request_body_response(json.dumps(token_response.json()))
+
+    # Now that you have tokens (yay) let's find and hit the URL
+    # from Google that gives you the user's profile information,
+    # including their Google profile image and email
+    userinfo_endpoint = GOOGLE_PROVIDER_CFG["userinfo_endpoint"]
+    uri, headers, body = client.add_token(userinfo_endpoint)
+    userinfo_response = requests.get(uri, headers=headers, data=body)
+
+    # You want to make sure their email is verified.
+    # The user authenticated with Google, authorized your
+    # app, and now you've verified their email through Google!
+    if userinfo_response.json().get("email_verified"):
+        unique_id = userinfo_response.json()["sub"]
+        users_email = userinfo_response.json()["email"]
+        users_name = userinfo_response.json()["given_name"]
+    else:
+        return "User email not available or not verified by Google.", 400
+
+    user = User(
+        id_=unique_id,
+        name=users_name,
+        email=users_email,
+    )
+    if not User.get(unique_id):
+        User.create(unique_id, users_name, users_email)
+
+    # Begin user session by logging the user in
+    login_user(user)
+
+    # Send user back to homepage
+    return redirect(url_for("index"))
+
+
+@application.route("/logout")
+@login_required
+def logout():
+    logout_user()
+    return redirect(url_for("index"))
 
 
 @application.route("/login_page", methods=["GET"])
@@ -153,10 +189,16 @@ def display_events():
     return render_template("display_events.html")
 
 
-@application.route("/account_page/<org_id>", methods=["GET"])
-def account_page(org_id):
+@application.route("/account_page", methods=["GET"])
+def account_page():
     account_info = {}
-    where_params = {"org_id": org_id}
+    where_params = {"org_id": current_user.id}
+
+    # if this user has not been onboarded yet, take them to the onboard form
+    if not read_all_fields_from_table(
+        table_name="contact_info", where_params=where_params
+    ):
+        return redirect(location=url_for("onboard_page"))
 
     for table_name, columns in ORGANIZER_DB_TABLES.items():
         row = read_all_fields_from_table(
@@ -200,8 +242,8 @@ def onboard_user():
 
     request_data = request.get_json()
 
-    current_max_org_id = get_current_max_org_id()
-    request_data["org_id"] = current_max_org_id + 1
+    # current_max_org_id = get_current_max_org_id()
+    request_data["org_id"] = current_user.id
 
     # insert into all tables
     for table_name, column_names in ORGANIZER_DB_TABLES.items():
@@ -271,4 +313,5 @@ def delete_account():
 
 
 if __name__ == "__main__":
+    # application.run(debug=True, ssl_context="adhoc")
     application.run(debug=True)
