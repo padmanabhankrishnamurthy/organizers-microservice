@@ -1,6 +1,6 @@
 import os
 import json
-from flask import Flask, request, jsonify, render_template, redirect, url_for
+from flask import Flask, request, jsonify, redirect, url_for
 from flask_login import (
     LoginManager,
     current_user,
@@ -55,18 +55,6 @@ ORGANIZER_DB_TABLES = {
         "zipcode",
         "country",
     ],
-    #     "events": [
-    #         "event_id",
-    #         "org_id",
-    #         "date",
-    #         "start_time",
-    #         "end_time",
-    #         "description",
-    #         "event_category",
-    #         "capacity",
-    #         "event_name",
-    #         "image",
-    #     ],
 }
 
 # inverse of ORGANIZER_DB_TABLES
@@ -171,21 +159,6 @@ def logout():
     return redirect(url_for("index"))
 
 
-@application.route("/login_page", methods=["GET"])
-def login_page():
-    return render_template("login_page.html")
-
-
-@application.route("/onboard_page", methods=["GET"])
-def onboard_page():
-    return render_template("organizer_onboard.html")
-
-
-@application.route("/display_events_page", methods=["GET"])
-def display_events():
-    return render_template("display_events.html")
-
-
 def get_account_info(org_id):
     account_info = {}
     where_params = {"org_id": org_id}
@@ -211,36 +184,6 @@ def get_account_info_route(org_id):
     account_info = get_account_info(org_id)
     print(f"Account Info: {account_info}")
     return jsonify(account_info)
-
-
-@application.route("/account_page", methods=["GET"])
-def render_account_page():
-    account_info = get_account_info(current_user.id)
-    print(f"Account Info: {account_info}")
-    return render_template("account_page.html", account_info=account_info)
-
-
-@application.route("/edit_page", methods=["GET"])
-def edit_page():
-    account_info = {}
-    where_params = {"org_id": current_user.id}
-
-    for table_name, columns in ORGANIZER_DB_TABLES.items():
-        row = read_all_fields_from_table(
-            table_name=table_name, where_params=where_params
-        )
-        info = zip(columns, row)
-        account_info.update(info)
-
-    print(f"Account Info: {account_info}")
-    return render_template("edit_info.html", account_info=account_info)
-
-
-@application.route("/add_event_page/<org_id>", methods=["GET"])
-def add_event_page(org_id):
-    account_info = {}
-    where_params = {"org_id": org_id}
-    return render_template("add_event.html", account_info=account_info)
 
 
 @application.route("/onboard_api", methods=["POST"])
