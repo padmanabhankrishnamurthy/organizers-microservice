@@ -1,7 +1,9 @@
 import boto3
 
-session = boto3.Session(profile_name='coms6156')
-SSM_CLIENT = session.client('ssm')
+# session = boto3.Session(profile_name='coms6156')
+# SSM_CLIENT = session.client('ssm')
+
+SSM_CLIENT = boto3.client("ssm")
 
 
 def get_google_ouath_keys() -> dict:
