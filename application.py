@@ -195,7 +195,7 @@ def onboard_user():
     request_data = request.get_json()
 
     # current_max_org_id = get_current_max_org_id()
-    request_data["org_id"] = current_user.id
+    # request_data["org_id"] = current_user.id
 
     # insert into all tables
     for table_name, column_names in ORGANIZER_DB_TABLES.items():
@@ -236,7 +236,7 @@ def update_account():
         update_table(
             table_name=table_name,
             update_params=update_params,
-            where_params={"org_id": current_user.id},
+            where_params={"org_id": request_data["where_params"]["org_id"]},
         )
 
     return jsonify({"status": "account update completed"})
