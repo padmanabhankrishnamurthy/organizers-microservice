@@ -55,18 +55,18 @@ ORGANIZER_DB_TABLES = {
         "zipcode",
         "country",
     ],
-        #     "events": [
-        #         "event_id",
-        #         "org_id",
-        #         "date",
-        #         "start_time",
-        #         "end_time",
-        #         "description",
-        #         "event_category",
-        #         "capacity",
-        #         "event_name",
-        #         "image",
-        #     ],
+    #     "events": [
+    #         "event_id",
+    #         "org_id",
+    #         "date",
+    #         "start_time",
+    #         "end_time",
+    #         "description",
+    #         "event_category",
+    #         "capacity",
+    #         "event_name",
+    #         "image",
+    #     ],
 }
 
 # inverse of ORGANIZER_DB_TABLES
@@ -161,7 +161,7 @@ def callback():
     login_user(user)
 
     # Send user back to account page, which will in turn send them to onboard page if they aren't registered
-    return redirect(url_for("account_page"))
+    return redirect(url_for("render_account_page"))
 
 
 @application.route("/logout")
@@ -186,10 +186,9 @@ def display_events():
     return render_template("display_events.html")
 
 
-@application.route("/account_page", methods=["GET"])
-def account_page():
+def get_account_info(org_id):
     account_info = {}
-    where_params = {"org_id": current_user.id}
+    where_params = {"org_id": org_id}
 
     # if this user has not been onboarded yet, take them to the onboard form
     if not read_all_fields_from_table(
@@ -214,9 +213,9 @@ def get_account_info_route(org_id):
     return jsonify(account_info)
 
 
-@application.route("/account_page/<org_id>", methods=["GET"])
-def account_page(org_id):
-    account_info = get_account_info(org_id)
+@application.route("/account_page", methods=["GET"])
+def render_account_page():
+    account_info = get_account_info(current_user.id)
     print(f"Account Info: {account_info}")
     return render_template("account_page.html", account_info=account_info)
 
